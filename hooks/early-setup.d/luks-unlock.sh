@@ -44,7 +44,8 @@ done
 
 unset src sources
 
-keydir="/tmp/keydir/etc/cryptsetup-keys.d"
+overlaydir="/tmp/keydir"
+keydir="${overlaydir}/etc/cryptsetup-keys.d"
 
 luks_unlock() {
   local partition="$1"
@@ -101,6 +102,13 @@ unlock_partitions() {
     mkdir -p "${keydir}"
     echo -n "${passphrase}" > "${keyfile}"
     chmod 0600 "${keyfile}"
+
+    mkdir -p "${overlaydir}/etc"
+    echo "${mapping} ${partition} /etc/cryptsetup-keys.d/${mapping}.key luks,discard" >> "${overlaydir}/etc/crypttab"
+
+    mkdir -p "${overlaydir}/cryptroot"
+    echo "${mapping} ${partition} /etc/cryptsetup-keys.d/${mapping}.key luks,discard" >> "${overlaydir}/cryptroot/crypttab"
+
     unset partition mapping
   done
 }
